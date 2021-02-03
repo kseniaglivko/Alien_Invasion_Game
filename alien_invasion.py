@@ -2,10 +2,13 @@ import sys
 
 import pygame
 
+from random import randint
+
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from star import Star
 
 class AlienInvasion:
 	'''Class to manage resources and game behaviour'''
@@ -22,8 +25,10 @@ class AlienInvasion:
 		self.ship = Ship(self)
 		self.bullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
+		self.stars = pygame.sprite.Group()
 		
 		self._create_fleet()
+		self._create_starry_sky()
 		
 	def run_game(self):
 		'''Lauching main cycle of the game'''
@@ -85,7 +90,7 @@ class AlienInvasion:
 		#Interval between aliens ifs equal to width of one alien
 		alien = Alien(self)
 		alien_width, alien_height = alien.rect.size
-		available_space_x = self.settings.screen_width - (2 * alien_width)
+		available_space_x = self.settings.screen_width - alien_width
 		number_of_aliens_x = available_space_x // (2 * alien_width)
 		
 		'''Assesing number of rows on the screen'''
@@ -109,10 +114,36 @@ class AlienInvasion:
 		alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
 		self.aliens.add(alien)
 		
-							
+	def _create_starry_sky(self):
+		'''Creating starry sky'''
+		star = Star(self)
+		star_width, star_height = star.rect.size
+		
+		available_space_x = self.settings.screen_width - star_width
+		number_of_stars = available_space_x // star_width
+		
+		available_space_y = self.settings.screen_height - star_height
+		number_of_rows = available_space_y // star_height
+		
+		#Creating sky
+		for row_number in range(number_of_rows):
+			for star_number in range(number_of_stars):
+				self._create_star(star_number, row_number)
+		
+	def _create_star(self, star_number, row_number):
+		'''Creating star and its placement'''
+		star = Star(self)
+		star_width, star_height = star.rect.size
+		star.x = randint(-50, 50) + 5 * star_width * star_number 
+		star.rect.x = star.x
+		star.rect.y = randint(-50, 50) + 5 * star.rect.height * row_number
+		self.stars.add(star)
+		
+									
 	def _update_screen(self):
 		#Trace screen for every cycle
 		self.screen.fill(self.settings.bg_color)
+		self.stars.draw(self.screen)
 		self.ship.blitme()
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet()
