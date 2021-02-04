@@ -7,6 +7,7 @@ from random import randint
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from superbullet import Superbullet
 from alien import Alien
 from star import Star
 
@@ -24,6 +25,7 @@ class AlienInvasion:
 		pygame.display.set_caption("Alien Invasion")
 		self.ship = Ship(self)
 		self.bullets = pygame.sprite.Group()
+		self.superbullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
 		self.stars = pygame.sprite.Group()
 		
@@ -35,7 +37,9 @@ class AlienInvasion:
 		while True:
 			self._check_events()
 			self.ship.update()
-			self._update_bullets()			
+			self._update_bullets()	
+			self._update_superbullets()
+			self._update_aliens()		
 			self._update_screen()
 					
 	def _check_events(self):
@@ -60,6 +64,8 @@ class AlienInvasion:
 			sys.exit()
 		elif event.key == pygame.K_SPACE:
 			self._fire_bullet()
+		elif event.key == pygame.K_RSHIFT:
+			self._fire_superbullet()
 						
 	def _check_keyup_events(self, event):
 		'''Reaction to keyup'''
@@ -74,6 +80,12 @@ class AlienInvasion:
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
 			
+	def _fire_superbullet(self):
+		'''Creating new superbullet'''
+		if len(self.superbullets) < self.settings.superbullets_allowed:
+			new_superbullet = Superbullet(self)
+			self.superbullets.add(new_superbullet)
+			
 	def _update_bullets(self):
 		'''Renewing bullets position and removing old ones'''
 		#Renew
@@ -83,6 +95,40 @@ class AlienInvasion:
 		for bullet in self.bullets.copy():
 			if bullet.rect.bottom <= 0:
 				self.bullets.remove(bullet)
+		
+		self._check_bullet_alien_collisions()
+		
+	def _check_bullet_alien_collisions(self):
+		'''Checking collision with alien'''
+		collisions = pygame.sprite.groupcollide(
+			self.bullets, self.aliens, True, True)
+			
+		if not self.aliens:
+			#Removal of existing bullets and creation of a new fleet
+			self.bullets.empty()
+			self._create_fleet()		
+							
+	def _update_superbullets(self):
+		'''Renewing superbullets position and removing old ones'''
+		#Renew
+		self.superbullets.update()
+		
+		#Removal of superbullets outside of the screen
+		for superbullet in self.superbullets.copy():
+			if superbullet.rect.bottom <= 0:
+				self.superbullets.remove(superbullet)
+						
+		self._check_superbullet_alien_collisions()
+		
+	def _check_superbullet_alien_collisions(self):
+		'''Checking collision with alien'''
+		collisions = pygame.sprite.groupcollide(
+			self.superbullets, self.aliens, False, True)
+			
+		if not self.aliens:
+			#Removal of existing superbullets and creation of a new fleet
+			self.superbullets.empty()
+			self._create_fleet()
 				
 	def _create_fleet(self):
 		'''Creating invasion fleet'''
@@ -113,6 +159,24 @@ class AlienInvasion:
 		alien.rect.x = alien.x
 		alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
 		self.aliens.add(alien)
+		
+	def _check_fleet_edges(self):
+		'''Reacts to alien's arrival to the edge of the screen'''
+		for alien in self.aliens.sprites():
+			if alien.check_edges():
+				self._change_fleet_direction()
+				break
+				
+	def _change_fleet_direction(self):
+		'''Moves fleet down and changes its direction'''
+		for alien in self.aliens.sprites():
+			alien.rect.y += self.settings.fleet_drop_speed
+		self.settings.fleet_directions *= -1
+		
+	def _update_aliens(self):
+		'''Updating fleet position'''
+		self._check_fleet_edges()
+		self.aliens.update()
 		
 	def _create_starry_sky(self):
 		'''Creating starry sky'''
@@ -147,6 +211,8 @@ class AlienInvasion:
 		self.ship.blitme()
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet()
+		for superbullet in self.superbullets.sprites():
+			superbullet.draw_superbullet()
 			
 		self.aliens.draw(self.screen)
 
