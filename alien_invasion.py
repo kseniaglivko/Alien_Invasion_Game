@@ -111,7 +111,8 @@ class AlienInvasion:
 		#Renew
 		self.superbullets.update()
 		
-		#Removal of superbullets outside of the screen and upon collision
+		#Removal of superbullets outside of the screen
+		#Create an explosion upon collision
 		for superbullet in self.superbullets.copy():
 			if superbullet.rect.bottom <= 0:
 				self.superbullets.remove(superbullet)
@@ -202,10 +203,8 @@ class AlienInvasion:
 		self.screen.fill(self.settings.bg_color)
 		self.stars.draw(self.screen)
 		self.ship.blitme()
-		for bullet in self.bullets.sprites():
-			bullet.draw_bullet()
-		for superbullet in self.superbullets.sprites():
-			superbullet.draw_superbullet()
+		self.bullets.draw(self.screen)
+		self.superbullets.draw(self.screen)
 		self.explosions.draw(self.screen)	
 		self.aliens.draw(self.screen)
 

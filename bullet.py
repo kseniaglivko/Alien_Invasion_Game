@@ -9,14 +9,16 @@ class Bullet(Sprite):
 		super().__init__()
 		self.screen = ai_game.screen
 		self.settings = ai_game.settings
-		self.color = self.settings.bullet_color
+				
+		#Creating bullet
+		self.image = pygame.image.load('images/bullet.png')
+		self.rect = self.image.get_rect()
+		self.rect.y = self.rect.height
 		
-		#Creating bullet at (0, 0) and assigning right position
-		self.rect = pygame.Rect(0, 0, self.settings.bullet_width,
-			self.settings.bullet_height)
-		self.rect.midtop = ai_game.ship.rect.midtop
+		#Make bullet fire from the top of the spaceship
+		self.rect.midbottom = ai_game.ship.rect.midtop
 		
-		#Storing bullet position in float
+		#Storing superbullet position in float
 		self.y = float(self.rect.y)
 		
 	def update(self):
@@ -27,8 +29,3 @@ class Bullet(Sprite):
 		
 		#Renewing rect position
 		self.rect.y = self.y
-		
-	def draw_bullet(self):
-		'''Bullets screen display'''
-		pygame.draw.rect(self.screen, self.color, self.rect)
-		

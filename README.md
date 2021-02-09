@@ -5,7 +5,7 @@ This is a realisation of Space Invaders Project from Eric Matthes' Python Crash 
 Instructions:
 
 - Right arrow, left arrow to move the ship.
-- Space to fire a bullet (three ibullets are allowed on the screen at the same time).
+- Space to fire a bullet (three bullets are allowed on the screen at the same time).
 - Right Shift to fire a superbullet.
 - Q to quit.
 

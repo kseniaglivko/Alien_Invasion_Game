@@ -13,16 +13,10 @@ class Settings:
 		
 		#Bullet settings
 		self.bullet_speed = 1.5
-		self.bullet_width = 5
-		self.bullet_height = 15
-		self.bullet_color = (204, 51, 0)
 		self.bullets_allowed = 3
 		
 		#SuperBullet settings
-		self.superbullet_speed = 1.5
-		self.superbullet_width = 30
-		self.superbullet_height = 45
-		self.superbullet_color = (204, 0, 0)
+		self.superbullet_speed = 2.5
 		self.superbullets_allowed = 1
 		
 		#Alien settings
