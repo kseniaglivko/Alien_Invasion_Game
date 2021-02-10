@@ -15,6 +15,8 @@ class Explosion(Sprite):
 				img = pygame.transform.scale(img, (80, 80))
 			if size == "big":
 				img = pygame.transform.scale(img, (120, 120))
+			if size == "super_big":
+				img = pygame.transform.scale(img, (200, 200))
 			self.images.append(img)
 		self.index = 0
 		self.image = self.images[self.index]
@@ -26,7 +28,7 @@ class Explosion(Sprite):
 		self.counter = 0
 	
 	def update(self):
-		explosion_speed = 10
+		explosion_speed = 15
 		#update explosion animation
 		self.counter += 1
 
