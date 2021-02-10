@@ -14,5 +14,5 @@ Features, added to the original project:
 
 1. Randomly generated starry sky as background.
 2. Added one superbullet that can stay active even after destroing an alien.
-3. Explosion animation, which scale depends on bullet type.
+3. Explosion animation, which scale depends on bullet type/collision type.
 

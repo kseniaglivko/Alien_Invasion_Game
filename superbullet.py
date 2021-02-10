@@ -25,7 +25,7 @@ class Superbullet(Sprite):
 		'''Moves object upwards'''
 		
 		#Renewing superbullet position in float format
-		self.y -= self.settings.superbullet_speed
+		self.y -= self.settings.superbullet_speed_factor
 		
 		#Renewing rect position
 		self.rect.y = self.y

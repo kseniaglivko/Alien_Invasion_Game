@@ -25,7 +25,7 @@ class Bullet(Sprite):
 		'''Moves object upwards'''
 		
 		#Renewing bullet position in float format
-		self.y -= self.settings.bullet_speed
+		self.y -= self.settings.bullet_speed_factor
 		
 		#Renewing rect position
 		self.rect.y = self.y
