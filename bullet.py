@@ -15,10 +15,10 @@ class Bullet(Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.y = self.rect.height
 		
-		#Make bullet fire from the top of the spaceship
+		#Making bullet fire from the top of the spaceship
 		self.rect.midbottom = ai_game.ship.rect.midtop
 		
-		#Storing superbullet position in float
+		#Storing bullet position in float
 		self.y = float(self.rect.y)
 		
 	def update(self):

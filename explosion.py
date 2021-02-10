@@ -7,7 +7,7 @@ class Explosion(Sprite):
 	def __init__(self, ai_game, center, size):
 		super().__init__()
 		
-		#Create a list to store explosion images to create animation
+		#Creating a list to store explosion images to create animation
 		self.images = []
 		for num in range(1, 6):
 			img = pygame.image.load(f"images/exp{num}.png")
@@ -22,14 +22,16 @@ class Explosion(Sprite):
 		self.image = self.images[self.index]
 		self.rect = self.image.get_rect()
 		
-		#Assign explosion position
+		#Assigning explosion position
 		self.rect.center = center
 
 		self.counter = 0
 	
 	def update(self):
+	
 		explosion_speed = 15
-		#update explosion animation
+		
+		#Updating explosion animation
 		self.counter += 1
 
 		if self.counter >= explosion_speed and self.index < len(self.images) - 1:
@@ -37,6 +39,6 @@ class Explosion(Sprite):
 			self.index += 1
 			self.image = self.images[self.index]
 
-		#if the animation is complete, delete explosion
+		#If the animation is complete, explosion desappears
 		if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
 			self.kill()

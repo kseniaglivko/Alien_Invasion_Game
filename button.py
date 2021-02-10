@@ -10,9 +10,9 @@ class Button:
 		self.image = pygame.image.load('images/play_button.png')
 		self.rect = self.image.get_rect()
 		
-		'''Button placement'''
+		#Button placement
 		self.rect.center = self.screen_rect.center
 		
 	def draw_button(self):
-		'''Draws play button on the screen'''
+		'''Drawing play button on the screen'''
 		self.screen.blit(self.image, self.rect)

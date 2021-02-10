@@ -2,10 +2,10 @@ import pygame
 from pygame.sprite import Sprite
 
 class Superbullet(Sprite):
-	'''Class for controlling ship bullets'''
+	'''Class to control ship bullets'''
 	
 	def __init__(self, ai_game):
-		'''Creating bullet object at the ship current position'''
+		'''Creating superbullet object at the ship current position'''
 		super().__init__()
 		self.screen = ai_game.screen
 		self.settings = ai_game.settings
@@ -22,7 +22,7 @@ class Superbullet(Sprite):
 		self.y = float(self.rect.y)
 		
 	def update(self):
-		'''Moves object upwards'''
+		'''Moving superbullet upwards'''
 		
 		#Renewing superbullet position in float format
 		self.y -= self.settings.superbullet_speed_factor

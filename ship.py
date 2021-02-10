@@ -1,14 +1,17 @@
 import pygame
+from pygame.sprite import Sprite
 
-class Ship:
+class Ship(Sprite):
 	'''Class to control the ship'''
+	
 	def __init__(self, ai_game):
 		'''Initializing the ship and its starting position'''
+		super().__init__()
 		self.screen = ai_game.screen
 		self.settings = ai_game.settings
 		self.screen_rect = ai_game.screen.get_rect()
 		
-		#Load ship image and get the rectangle
+		#Loading ship image
 		self.image = pygame.image.load('images/ship.bmp')
 		self.rect = self.image.get_rect()
 		
@@ -24,8 +27,8 @@ class Ship:
 		
 		
 	def update(self):
-		'''Update ship position'''
-		#Renew x attribute, not rect
+		'''Updating ship position'''
+		#Renewing x attribute, not rect
 		if self.moving_right and self.rect.right < self.screen_rect.right:
 			self.x += self.settings.ship_speed_factor
 		if self.moving_left and self.rect.left > 0:
