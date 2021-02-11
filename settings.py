@@ -1,11 +1,17 @@
+import pygame
+
 class Settings:
 	'''Class to store all the game settings'''
 	
 	def __init__(self):
 		'''Initializing static game settings'''
+		
+		pygame.init()
+		pygame.mixer.init()
+		
 		#Screen parameters 
-		self.screen_width = 1200
-		self.screen_height = 800
+		self.screen_width = 1920
+		self.screen_height = 1080
 		self.bg_color = (16, 16, 61)
 		
 		#Ship settings
@@ -49,4 +55,43 @@ class Settings:
 		self.alien_speed_factor *= self.speedup_scale
 		
 		self.alien_points_bullet = int(self.alien_points_bullet * self.score_scale)
-		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)
+		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)\
+		
+	def play_sound_effect(self, effect):
+		'''Initializing sound effects'''
+		if effect == "shoot_bullet":
+			self.bullet_sound = pygame.mixer.Sound("sounds/bullet_sound")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "shoot_superbullet":
+			self.bullet_sound = pygame.mixer.Sound("sounds/superbullet_sound")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "shoot_alien_lazer":
+			self.bullet_sound = pygame.mixer.Sound("sounds/alien_lazer")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "small_explosion":
+			self.bullet_sound = pygame.mixer.Sound("sounds/small_explosion")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()	
+		elif effect == "big_explosion":
+			self.bullet_sound = pygame.mixer.Sound("sounds/big_explosion")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "super_big_explosion":
+			self.bullet_sound = pygame.mixer.Sound("sounds/super_big_explosion")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "press_button":
+			self.bullet_sound = pygame.mixer.Sound("sounds/button_pressed")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()	
+		elif effect == "new_level":
+			self.bullet_sound = pygame.mixer.Sound("sounds/new_level")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()
+		elif effect == "ship_hit":
+			self.bullet_sound = pygame.mixer.Sound("sounds/ship_hit")
+			self.bullet_sound.set_volume(0.15)
+			self.bullet_sound.play()		

@@ -23,12 +23,13 @@ class AlienInvasion:
 	def __init__(self):
 		'''Initialising game and game resources'''
 		pygame.init()
+
 		self.settings = Settings()
 
 		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 		self.settings.screen_width = self.screen.get_rect().width
 		self.settings.screen_height = self.screen.get_rect().height
-		pygame.display.set_caption("Alien Invasion")
+		pygame.display.set_caption("Alien Invasion!")
 
 		self.stats = GameStats(self)
 		self.scoreboard = Scoreboard(self)
@@ -77,6 +78,7 @@ class AlienInvasion:
 		button_clicked = self.play_button.rect.collidepoint(mouse_pos)
 
 		if button_clicked and not self.stats.game_active:
+			self.settings.play_sound_effect("press_button")
 			self._game_launch()
 		
 	def _game_launch(self):
@@ -104,22 +106,16 @@ class AlienInvasion:
 		'''Reaction to keydown'''
 		if event.key == pygame.K_RIGHT:
 			self.ship.moving_right = True
-			
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = True
-			
 		elif event.key == pygame.K_p:
 			self._game_launch()
-			
 		elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
-		
 			with open("high_score.txt", "w") as file_object:
 				file_object.write(str(self.stats.high_score))
 			sys.exit()
-			
 		elif event.key == pygame.K_SPACE:
 			self._fire_bullet()
-			
 		elif event.key == pygame.K_RSHIFT:
 			self._fire_superbullet()
 						
@@ -136,12 +132,14 @@ class AlienInvasion:
 		if len(self.bullets) < self.settings.bullets_allowed:
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
+			self.settings.play_sound_effect("shoot_bullet")
 			
 	def _fire_superbullet(self):
 		'''Creating new superbullet and adding it into superbullet group'''
 		if len(self.superbullets) < self.settings.superbullets_allowed:
 			new_superbullet = Superbullet(self)
 			self.superbullets.add(new_superbullet)
+			self.settings.play_sound_effect("shoot_superbullet")
 			
 	def _update_bullets(self):
 		'''Renewing bullets position and removing old ones'''
@@ -160,6 +158,7 @@ class AlienInvasion:
 				bullet.kill()
 				explosion = Explosion(self, collision.rect.center, "small")
 				self.explosions.add(explosion)
+				self.settings.play_sound_effect("small_explosion")
 				self.stats.score += self.settings.alien_points_bullet
 				self.scoreboard.prep_score()
 				self.scoreboard.check_high_score()
@@ -183,6 +182,7 @@ class AlienInvasion:
 			for collision in collisions:
 				explosion = Explosion(self, collision.rect.center, "big")
 				self.explosions.add(explosion)
+				self.settings.play_sound_effect("big_explosion")
 				self.stats.score += self.settings.alien_points_superbullet
 				self.scoreboard.prep_score()
 				self.scoreboard.check_high_score()
@@ -191,6 +191,7 @@ class AlienInvasion:
 			self._start_new_level()
 			
 	def _start_new_level(self):
+		self.settings.play_sound_effect("new_level")
 		#Create new fleet as old one gets destroyed
 		self.bullets.empty()
 		self._create_fleet()
@@ -261,7 +262,7 @@ class AlienInvasion:
 			
 	def _ship_hit(self):
 		'''Processing alien-starship collision'''
-		
+		self.settings.play_sound_effect("ship_hit")
 		if self.stats.ships_left > 0:
 			#Decreasing number of ships left
 			self.stats.ships_left -= 1
@@ -289,6 +290,7 @@ class AlienInvasion:
 			if alien.rect.bottom >= screen_rect.bottom:
 				screen_explosion = Explosion(self, screen_rect.center, "super_big")
 				self.explosions.add(screen_explosion)
+				self.settings.play_sound_effect("super_big_explosion")
 				self._ship_hit()
 				break
 		
