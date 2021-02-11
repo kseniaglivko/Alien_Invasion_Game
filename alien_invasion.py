@@ -44,7 +44,9 @@ class AlienInvasion:
 		self._create_fleet()
 		self._create_starry_sky()
 		
-		self.play_button = Button(self)
+		self.play_button = Button(self, "play")
+		self.sound_button = Button(self, "sound")
+		self.mute_button = Button(self, "mute")
 		
 	def run_game(self):
 		'''Lauching main cycle of the game'''
@@ -71,15 +73,28 @@ class AlienInvasion:
 				self._check_keyup_events(event)
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				mouse_pos = pygame.mouse.get_pos()
-				self._check_play_button(mouse_pos)
+				self._check_button(mouse_pos)
 				
-	def _check_play_button(self, mouse_pos):
-		'''Launching game if Play button is pressed'''
-		button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+	def _check_button(self, mouse_pos):
+		'''Checking if any of the buttons was pressed'''
+		play_button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+		sound_button_clicked = self.sound_button.rect.collidepoint(mouse_pos)
+		mute_button_clicked = self.mute_button.rect.collidepoint(mouse_pos)
 
-		if button_clicked and not self.stats.game_active:
+		#Launching game if Play button is pressed
+		if play_button_clicked and not self.stats.game_active:
 			self.settings.play_sound_effect("press_button")
 			self._game_launch()
+			
+		#Turning the sound on if on mute
+		if sound_button_clicked and not self.settings.sound_on:
+			self.settings.play_sound_effect("press_button")
+			self.settings.sound_on = True
+			
+		#Muting
+		if mute_button_clicked and self.settings.sound_on:
+			self.settings.play_sound_effect("press_button")
+			self.settings.sound_on = False
 		
 	def _game_launch(self):
 		#Resetting game statistics
@@ -104,7 +119,14 @@ class AlienInvasion:
 			
 	def _check_keydown_events(self, event):
 		'''Reaction to keydown'''
-		if event.key == pygame.K_RIGHT:
+		
+		if event.key == pygame.K_LSHIFT and not self.settings.sound_on:
+			self.settings.play_sound_effect("press_button")
+			self.settings.sound_on = True
+		elif event.key == pygame.K_LSHIFT and self.settings.sound_on:
+			self.settings.play_sound_effect("press_button")
+			self.settings.sound_on = False
+		elif event.key == pygame.K_RIGHT:
 			self.ship.moving_right = True
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = True
@@ -132,14 +154,16 @@ class AlienInvasion:
 		if len(self.bullets) < self.settings.bullets_allowed:
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
-			self.settings.play_sound_effect("shoot_bullet")
+			if self.settings.sound_on:
+				self.settings.play_sound_effect("shoot_bullet")
 			
 	def _fire_superbullet(self):
 		'''Creating new superbullet and adding it into superbullet group'''
 		if len(self.superbullets) < self.settings.superbullets_allowed:
 			new_superbullet = Superbullet(self)
 			self.superbullets.add(new_superbullet)
-			self.settings.play_sound_effect("shoot_superbullet")
+			if self.settings.sound_on:
+				self.settings.play_sound_effect("shoot_superbullet")
 			
 	def _update_bullets(self):
 		'''Renewing bullets position and removing old ones'''
@@ -158,10 +182,12 @@ class AlienInvasion:
 				bullet.kill()
 				explosion = Explosion(self, collision.rect.center, "small")
 				self.explosions.add(explosion)
-				self.settings.play_sound_effect("small_explosion")
 				self.stats.score += self.settings.alien_points_bullet
 				self.scoreboard.prep_score()
 				self.scoreboard.check_high_score()
+				if self.settings.sound_on:
+					self.settings.play_sound_effect("small_explosion")
+
 				
 		if not self.aliens:
 			self._start_new_level()
@@ -182,16 +208,16 @@ class AlienInvasion:
 			for collision in collisions:
 				explosion = Explosion(self, collision.rect.center, "big")
 				self.explosions.add(explosion)
-				self.settings.play_sound_effect("big_explosion")
 				self.stats.score += self.settings.alien_points_superbullet
 				self.scoreboard.prep_score()
 				self.scoreboard.check_high_score()
+				if self.settings.sound_on:
+					self.settings.play_sound_effect("big_explosion")
 				
 		if not self.aliens:
 			self._start_new_level()
 			
 	def _start_new_level(self):
-		self.settings.play_sound_effect("new_level")
 		#Create new fleet as old one gets destroyed
 		self.bullets.empty()
 		self._create_fleet()
@@ -200,6 +226,9 @@ class AlienInvasion:
 		#Level increase
 		self.stats.level += 1
 		self.scoreboard.prep_level()
+		
+		if self.settings.sound_on:
+			self.settings.play_sound_effect("new_level")
 			
 	def _update_explosions(self):
 		self.explosions.update()
@@ -262,7 +291,6 @@ class AlienInvasion:
 			
 	def _ship_hit(self):
 		'''Processing alien-starship collision'''
-		self.settings.play_sound_effect("ship_hit")
 		if self.stats.ships_left > 0:
 			#Decreasing number of ships left
 			self.stats.ships_left -= 1
@@ -283,6 +311,9 @@ class AlienInvasion:
 			self.stats.game_active = False
 			pygame.mouse.set_visible(True)
 		
+		if self.settings.sound_on:
+			self.settings.play_sound_effect("ship_hit")
+		
 	def _check_aliens_bottom(self):
 		'''Checking for alien ship to get to the bottom of the screen'''
 		screen_rect = self.screen.get_rect()
@@ -292,6 +323,9 @@ class AlienInvasion:
 				self.explosions.add(screen_explosion)
 				self.settings.play_sound_effect("super_big_explosion")
 				self._ship_hit()
+				if self.settings.sound_on:
+					self.settings.play_sound_effect("ship_hit")
+					break
 				break
 		
 	def _create_starry_sky(self):
@@ -328,6 +362,8 @@ class AlienInvasion:
 		self.explosions.draw(self.screen)	
 		self.aliens.draw(self.screen)
 		self.scoreboard.show_score()
+		self.sound_button.draw_button()
+		self.mute_button.draw_button()
 		
 		#Displaying Play button if the game is inactive
 		if not self.stats.game_active:

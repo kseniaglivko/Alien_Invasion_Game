@@ -14,6 +14,9 @@ class Settings:
 		self.screen_height = 1080
 		self.bg_color = (16, 16, 61)
 		
+		#Sound parameters
+		self.sound_on = True
+		
 		#Ship settings
 		self.ship_limit = 3
 		
@@ -55,7 +58,7 @@ class Settings:
 		self.alien_speed_factor *= self.speedup_scale
 		
 		self.alien_points_bullet = int(self.alien_points_bullet * self.score_scale)
-		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)\
+		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)
 		
 	def play_sound_effect(self, effect):
 		'''Initializing sound effects'''
