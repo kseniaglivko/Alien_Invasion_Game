@@ -1,5 +1,7 @@
 import pygame
 
+from random import randrange
+
 class Settings:
 	'''Class to store all the game settings'''
 	
@@ -21,15 +23,10 @@ class Settings:
 		self.ship_limit = 3
 		
 		#Bullet settings
-		self.bullets_allowed = 3
+		self.bullets_allowed = 5
 		
 		#Superbullet settings
 		self.superbullets_allowed = 1
-		
-		#Alien settings
-		self.fleet_drop_speed = 10
-		#fleet direction: 1 - to the right, -1 - to the left
-		self.fleet_direction = 1
 		
 		#Game speed acceleration
 		self.speedup_scale = 1.1
@@ -41,10 +38,9 @@ class Settings:
 	
 	def initialize_dynamic_settings(self):
 		'''Initializing settings, that change during the game'''
-		self.ship_speed_factor = 1.0
-		self.bullet_speed_factor = 2.5
-		self.superbullet_speed_factor = 3.0
-		self.alien_speed_factor = 1.0
+		self.ship_speed_factor = 9.0
+		self.bullet_speed_factor = 10.0
+		self.superbullet_speed_factor = 12.0
 		
 		#Score count
 		self.alien_points_bullet = 50
@@ -55,8 +51,6 @@ class Settings:
 		self.ship_speed_factor *= self.speedup_scale
 		self.bullet_speed_factor *= self.speedup_scale
 		self.superbullet_speed_factor *= self.speedup_scale
-		self.alien_speed_factor *= self.speedup_scale
-		
 		self.alien_points_bullet = int(self.alien_points_bullet * self.score_scale)
 		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)
 		

@@ -17,6 +17,8 @@ from alien import Alien
 from star import Star
 from explosion import Explosion
 
+FPS = 60
+
 class AlienInvasion:
 	'''Class to manage resources and game behaviour'''
 
@@ -30,6 +32,8 @@ class AlienInvasion:
 		self.settings.screen_width = self.screen.get_rect().width
 		self.settings.screen_height = self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion!")
+		
+		self.clock = pygame.time.Clock()
 
 		self.stats = GameStats(self)
 		self.scoreboard = Scoreboard(self)
@@ -40,18 +44,17 @@ class AlienInvasion:
 		self.aliens = pygame.sprite.Group()
 		self.stars = pygame.sprite.Group()
 		self.explosions = pygame.sprite.Group()
-				
-		self._create_fleet()
+
 		self._create_starry_sky()
 		
 		self.play_button = Button(self, "play")
 		self.sound_button = Button(self, "sound")
-		self.mute_button = Button(self, "mute")
 		
 	def run_game(self):
 		'''Lauching main cycle of the game'''
 		while True:
 			self._check_events()
+			self.clock.tick(FPS)
 			
 			if self.stats.game_active:
 				self.ship.update()
@@ -79,23 +82,33 @@ class AlienInvasion:
 		'''Checking if any of the buttons was pressed'''
 		play_button_clicked = self.play_button.rect.collidepoint(mouse_pos)
 		sound_button_clicked = self.sound_button.rect.collidepoint(mouse_pos)
-		mute_button_clicked = self.mute_button.rect.collidepoint(mouse_pos)
 
 		#Launching game if Play button is pressed
 		if play_button_clicked and not self.stats.game_active:
-			self.settings.play_sound_effect("press_button")
 			self._game_launch()
-			
-		#Turning the sound on if on mute
-		if sound_button_clicked and not self.settings.sound_on:
-			self.settings.play_sound_effect("press_button")
-			self.settings.sound_on = True
+			if self.settings.sound_on:
+				self.settings.play_sound_effect("press_button")
 			
 		#Muting
-		if mute_button_clicked and self.settings.sound_on:
+		elif sound_button_clicked and self.settings.sound_on:
 			self.settings.play_sound_effect("press_button")
-			self.settings.sound_on = False
-		
+			
+			#Changing image from mute to sound on
+			#As the next click on this button is to turn the sound on
+			sound_on_image = pygame.image.load('images/sound_on_button.png')
+			self.sound_button.image.blit(sound_on_image, [0, 0])
+			self.settings.sound_on = False	
+			
+		#Turning the sound on if on mute
+		elif sound_button_clicked and not self.settings.sound_on:
+			self.settings.play_sound_effect("press_button")
+			
+			#Changing image from sound on to mute
+			#As the next click on this button is to mute
+			mute_image = pygame.image.load('images/mute_button.png')
+			self.sound_button.image.blit(mute_image, [0, 0])
+			self.settings.sound_on = True
+			
 	def _game_launch(self):
 		#Resetting game statistics
 		self.settings.initialize_dynamic_settings()
@@ -110,8 +123,8 @@ class AlienInvasion:
 		self.bullets.empty()
 		self.superbullets.empty()
 			
-		#Creating new fleet and positioning the ship in center
-		self._create_fleet()
+		#Positioning the ship in center
+		self._create_alien()
 		self.ship.center_ship()
 			
 		#Hiding cursor
@@ -122,9 +135,19 @@ class AlienInvasion:
 		
 		if event.key == pygame.K_LSHIFT and not self.settings.sound_on:
 			self.settings.play_sound_effect("press_button")
+			
+			#Changing image from sound on to mute
+			#As the next click on this button is to mute
+			mute_image = pygame.image.load('images/mute_button.png')
+			self.sound_button.image.blit(mute_image, [0, 0])
 			self.settings.sound_on = True
 		elif event.key == pygame.K_LSHIFT and self.settings.sound_on:
 			self.settings.play_sound_effect("press_button")
+			
+			#Changing image from mute to sound on
+			#As the next click on this button is to turn the sound on
+			sound_on_image = pygame.image.load('images/sound_on_button.png')
+			self.sound_button.image.blit(sound_on_image, [0, 0])
 			self.settings.sound_on = False
 		elif event.key == pygame.K_RIGHT:
 			self.ship.moving_right = True
@@ -145,7 +168,6 @@ class AlienInvasion:
 		'''Reaction to keyup'''
 		if event.key == pygame.K_RIGHT:
 			self.ship.moving_right = False
-			
 		elif event.key == pygame.K_LEFT:
 			self.ship.moving_left = False
 			
@@ -187,8 +209,7 @@ class AlienInvasion:
 				self.scoreboard.check_high_score()
 				if self.settings.sound_on:
 					self.settings.play_sound_effect("small_explosion")
-
-				
+					
 		if not self.aliens:
 			self._start_new_level()
 
@@ -213,15 +234,17 @@ class AlienInvasion:
 				self.scoreboard.check_high_score()
 				if self.settings.sound_on:
 					self.settings.play_sound_effect("big_explosion")
-				
+					
 		if not self.aliens:
 			self._start_new_level()
 			
 	def _start_new_level(self):
-		#Create new fleet as old one gets destroyed
+		'''Initializing new level settings'''
+		self._create_alien()
 		self.bullets.empty()
-		self._create_fleet()
 		self.settings.increase_speed()
+		for alien in self.aliens.sprites():
+			alien.increase_alien_speed()
 			
 		#Level increase
 		self.stats.level += 1
@@ -233,53 +256,16 @@ class AlienInvasion:
 	def _update_explosions(self):
 		self.explosions.update()
 				
-	def _create_fleet(self):
-		'''Creating invasion fleet'''
-		#Creating an alien and counting number of aliens in the row
-		#Interval between aliens ifs equal to width of one alien
-		alien = Alien(self)
-		alien_width, alien_height = alien.rect.size
-		available_space_x = self.settings.screen_width - alien_width
-		number_of_aliens_x = available_space_x // (2 * alien_width)
-		
-		#Assessing number of rows on the screen
-		ship_height = self.ship.rect.height
-		available_space_y = (self.settings.screen_height - 
-			(3 * alien_height) - ship_height)
-		number_of_rows = available_space_y // (2 * alien_height)
-		
-		#Creating fleet itself
-		for row_number in range(number_of_rows):
-			for alien_number in range(number_of_aliens_x):
-				self._create_alien(alien_number, row_number)
-			
-	def _create_alien(self, alien_number, row_number):
-		'''Creating an alien and its placement in a row'''
-		alien = Alien(self)
-		alien_width, alien_height = alien.rect.size
-		alien.x = alien_width + 2 * alien_width * alien_number
-		alien.rect.x = alien.x
-		alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
-		self.aliens.add(alien)
-				
-	def _check_fleet_edges(self):
-		'''Reaction to alien's arrival to the edge of the screen'''
-		for alien in self.aliens.sprites():
-			if alien.check_edges():
-				self._change_fleet_direction()
-				break
-				
-	def _change_fleet_direction(self):
-		'''Moving fleet down and changing its direction'''
-		for alien in self.aliens.sprites():
-			alien.rect.y += self.settings.fleet_drop_speed
-		self.settings.fleet_direction *= -1
+	def _create_alien(self):
+		'''Creating an alien'''
+		for alien in range(9):
+			alien = Alien(self)
+			self.aliens.add(alien)
 		
 	def _update_aliens(self):
-		'''Updating fleet position'''
-		self._check_fleet_edges()
+		'''Updating alien position'''
 		self.aliens.update()
-		
+	
 		#Checking for collisions between spaceship and alien ship
 		if pygame.sprite.spritecollideany(self.ship, self.aliens):
 			ship_explosion = Explosion(self, self.ship.rect.center, "big")
@@ -301,8 +287,7 @@ class AlienInvasion:
 			self.bullets.empty()
 			self.superbullets.empty()
 			
-			#Creating new alien fleet and positioning new ship in the center
-			self._create_fleet()
+			#Positioning new ship in the center
 			self.ship.center_ship()
 			
 			#Pause
@@ -321,10 +306,10 @@ class AlienInvasion:
 			if alien.rect.bottom >= screen_rect.bottom:
 				screen_explosion = Explosion(self, screen_rect.center, "super_big")
 				self.explosions.add(screen_explosion)
-				self.settings.play_sound_effect("super_big_explosion")
 				self._ship_hit()
 				if self.settings.sound_on:
 					self.settings.play_sound_effect("ship_hit")
+					self.settings.play_sound_effect("super_big_explosion")
 					break
 				break
 		
@@ -363,7 +348,6 @@ class AlienInvasion:
 		self.aliens.draw(self.screen)
 		self.scoreboard.show_score()
 		self.sound_button.draw_button()
-		self.mute_button.draw_button()
 		
 		#Displaying Play button if the game is inactive
 		if not self.stats.game_active:

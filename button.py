@@ -11,9 +11,9 @@ class Button:
 		
 		if effect == "play":
 			self.image = pygame.image.load('images/play_button.png')
+		#Sound button - by default it is a mute button image
+		#As the sound is on and mute button is for turning the sound off
 		elif effect == "sound":
-			self.image = pygame.image.load('images/sound_button.png')
-		elif effect == "mute":
 			self.image = pygame.image.load('images/mute_button.png')
 			
 		self.rect = self.image.get_rect()
@@ -23,13 +23,8 @@ class Button:
 			self.rect.center = self.screen_rect.center
 		elif effect == "sound":
 			self.rect = self.image.get_rect()
-			self.rect.right = self.screen_rect.right - 525
-			self.rect.top = 20
-		elif effect == "mute":
-			self.rect = self.image.get_rect()
-			self.rect.right = self.screen_rect.right - 475
-			self.rect.top = 20
-		
+			self.rect.left = self.screen_rect.left + 10
+			self.rect.top = 120
 		
 	def draw_button(self):
 		'''Drawing play button on the screen'''

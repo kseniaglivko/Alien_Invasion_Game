@@ -25,20 +25,22 @@ class Explosion(Sprite):
 		#Assigning explosion position
 		self.rect.center = center
 
-		self.counter = 0
+		self.frame = 0
+		self.last_update = pygame.time.get_ticks()
+		self.frame_rate = 75
 	
 	def update(self):
 	
-		explosion_speed = 15
-		
-		#Updating explosion animation
-		self.counter += 1
+		now = pygame.time.get_ticks()
 
-		if self.counter >= explosion_speed and self.index < len(self.images) - 1:
-			self.counter = 0
-			self.index += 1
-			self.image = self.images[self.index]
+		if now - self.last_update > self.frame_rate:
+			self.last_update = now
+			self.frame += 1
+			if self.frame == len(self.images):
+				self.kill()
+			else:
+				center = self.rect.center
+				self.image = self.images[self.frame]
+				self.rect = self.image.get_rect()
+				self.rect.center = center
 
-		#If the animation is complete, explosion desappears
-		if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
-			self.kill()

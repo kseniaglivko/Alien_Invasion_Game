@@ -1,6 +1,8 @@
 import pygame
 from pygame.sprite import Sprite
 
+from random import randrange
+
 class Alien(Sprite):
 	'''Class to create one alien'''
 	
@@ -15,24 +17,31 @@ class Alien(Sprite):
 		self.rect = self.image.get_rect()
 		
 		#Assigning starting position
-		self.rect.x = self.rect.width
-		self.rect.y = self.rect.height
+		self.rect.x = randrange(self.settings.screen_width - self.rect.width)
+		self.rect.bottom = randrange(-80, -20)
 		
-		#Saving the exact horizontal position
-		self.x = float(self.rect.x)
+		#Speed settings
+		self.alien_speed_factor_x = 1.0
+		self.alien_speed_factor_y = randrange(-8, -6)
+		self.alien_drop_speed = 10
+		self.alien_speed_up_scale = 0.9
+
+		#Alien_direction: 1 - to the right, -1 - to the left
+		self.alien_direction = 1
 		
 	def check_edges(self):
 		'''Returns True if alien if at the edge of the screen'''
 		screen_rect = self.screen.get_rect()
 		if self.rect.right >= screen_rect.right or self.rect.left <= 0:
-			return True
-			
+			return True		
+		
 	def update(self):
-		'''Moving alien to the right or left'''
-		self.x += (self.settings.alien_speed_factor * self.settings.fleet_direction)
-		self.rect.x = self.x
-
-		
-		
-
-
+		'''Moving alien randomly on the screen'''
+		self.rect.x += (self.alien_speed_factor_x * self.alien_direction)
+		self.rect.y += self.alien_speed_factor_y
+		if self.check_edges:
+			self.rect.y += self.alien_drop_speed
+			self.alien_direction *= -1
+			
+	def increase_alien_speed(self):
+		self.alien_speed_factor_y *= self.alien_speed_up_scale
