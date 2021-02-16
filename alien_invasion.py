@@ -4,7 +4,7 @@ from time import sleep
 
 import pygame
 
-from random import randint
+import random
 
 from settings import Settings
 from game_stats import GameStats
@@ -14,6 +14,7 @@ from ship import Ship
 from bullet import Bullet
 from superbullet import Superbullet
 from alien import Alien
+from lazer import Lazer
 from star import Star
 from explosion import Explosion
 
@@ -31,6 +32,7 @@ class AlienInvasion:
 		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 		self.settings.screen_width = self.screen.get_rect().width
 		self.settings.screen_height = self.screen.get_rect().height
+		self.screen_rect = self.screen.get_rect()
 		pygame.display.set_caption("Alien Invasion!")
 		
 		self.clock = pygame.time.Clock()
@@ -42,6 +44,7 @@ class AlienInvasion:
 		self.bullets = pygame.sprite.Group()
 		self.superbullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
+		self.lazers = pygame.sprite.Group()
 		self.stars = pygame.sprite.Group()
 		self.explosions = pygame.sprite.Group()
 
@@ -60,6 +63,7 @@ class AlienInvasion:
 				self.ship.update()
 				self._update_bullets()	
 				self._update_superbullets()
+				self._update_lazers()
 				self._update_explosions()
 				self._update_aliens()
 					
@@ -122,6 +126,7 @@ class AlienInvasion:
 		self.aliens.empty()
 		self.bullets.empty()
 		self.superbullets.empty()
+		self.lazers.empty()
 			
 		#Positioning the ship in center
 		self._create_alien()
@@ -274,7 +279,42 @@ class AlienInvasion:
 			
 		#Checking for alien ship to get to the bottom of the screen
 		self._check_aliens_bottom()
-			
+
+	def _update_lazers(self):
+		'''Creating new lazer and controlling time between lazer shoots'''
+		#Recording current time
+		time_now = pygame.time.get_ticks()
+		last_lazer_shoot = self.settings.last_lazer_shoot
+		cooldown = self.settings.lazer_cooldown
+		lazers = len(self.lazers)
+		aliens = len(self.aliens)
+		
+		#Shooting
+		if time_now - last_lazer_shoot > cooldown and lazers < 5 and aliens > 0:
+			attacking_alien = random.choice(self.aliens.sprites())
+			lazer = Lazer(self, attacking_alien.rect.centerx, attacking_alien.rect.bottom)
+			self.lazers.add(lazer)
+			self.settings.last_lazer_shoot = time_now
+			if self.settings.sound_on:
+				self.settings.play_sound_effect("shoot_alien_lazer")
+				
+		#Renewing lazers position and removing old ones
+		self.lazers.update()
+
+		#Removing lazers outside the screen
+		for lazer in self.lazers.copy():
+			if lazer.rect.top >= self.settings.screen_height:
+				self.lazers.remove(lazer)
+				
+			#Checking lazer-ship collision and running explosion animation
+			if pygame.sprite.spritecollideany(self.ship, self.lazers):
+				explosion = Explosion(self, self.ship.rect.center, "small")
+				self.explosions.add(explosion)
+				if self.settings.sound_on:
+					self.settings.play_sound_effect("small_explosion")
+					self._ship_hit()
+				self._ship_hit()
+		
 	def _ship_hit(self):
 		'''Processing alien-starship collision'''
 		if self.stats.ships_left > 0:
@@ -306,12 +346,11 @@ class AlienInvasion:
 			if alien.rect.bottom >= screen_rect.bottom:
 				screen_explosion = Explosion(self, screen_rect.center, "super_big")
 				self.explosions.add(screen_explosion)
-				self._ship_hit()
 				if self.settings.sound_on:
 					self.settings.play_sound_effect("ship_hit")
 					self.settings.play_sound_effect("super_big_explosion")
-					break
-				break
+					self._ship_hit()
+				self._ship_hit()
 		
 	def _create_starry_sky(self):
 		'''Creating starry sky'''
@@ -332,9 +371,9 @@ class AlienInvasion:
 		'''Creating star and its placement'''
 		star = Star(self)
 		star_width, star_height = star.rect.size
-		star.x = randint(-50, 50) + 5 * star_width * star_number 
+		star.x = random.randint(-50, 50) + 5 * star_width * star_number 
 		star.rect.x = star.x
-		star.rect.y = randint(-50, 50) + 5 * star.rect.height * row_number
+		star.rect.y = random.randint(-50, 50) + 5 * star.rect.height * row_number
 		self.stars.add(star)
 										
 	def _update_screen(self):
@@ -346,6 +385,7 @@ class AlienInvasion:
 		self.superbullets.draw(self.screen)
 		self.explosions.draw(self.screen)	
 		self.aliens.draw(self.screen)
+		self.lazers.draw(self.screen)
 		self.scoreboard.show_score()
 		self.sound_button.draw_button()
 		

@@ -22,7 +22,7 @@ class Bullet(Sprite):
 		self.y = float(self.rect.y)
 		
 	def update(self):
-		'''Moves object upwards'''
+		'''Moving bullet upwards'''
 		
 		#Renewing bullet position in float format
 		self.y -= self.settings.bullet_speed_factor

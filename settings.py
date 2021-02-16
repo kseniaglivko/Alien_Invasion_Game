@@ -28,6 +28,12 @@ class Settings:
 		#Superbullet settings
 		self.superbullets_allowed = 1
 		
+		#Lazer cooldown in milliseconds
+		self.lazer_cooldown = 1000
+		
+		#Controlling time between lazer shoots
+		self.last_lazer_shoot = pygame.time.get_ticks()
+		
 		#Game speed acceleration
 		self.speedup_scale = 1.1
 		
@@ -41,6 +47,7 @@ class Settings:
 		self.ship_speed_factor = 9.0
 		self.bullet_speed_factor = 10.0
 		self.superbullet_speed_factor = 12.0
+		self.lazer_speed_factor = 10.0
 		
 		#Score count
 		self.alien_points_bullet = 50
@@ -51,6 +58,7 @@ class Settings:
 		self.ship_speed_factor *= self.speedup_scale
 		self.bullet_speed_factor *= self.speedup_scale
 		self.superbullet_speed_factor *= self.speedup_scale
+		self.lazer_speed_factor *= self.speedup_scale
 		self.alien_points_bullet = int(self.alien_points_bullet * self.score_scale)
 		self.alien_points_superbullet = int(self.alien_points_superbullet * self.score_scale)
 		
