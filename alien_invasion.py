@@ -40,7 +40,7 @@ class AlienInvasion:
 		self.stats = GameStats(self)
 		self.scoreboard = Scoreboard(self)
 		
-		self.ship = Ship(self)
+		self.ship = Ship(self, 3)
 		self.bullets = pygame.sprite.Group()
 		self.superbullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
@@ -61,9 +61,11 @@ class AlienInvasion:
 			
 			if self.stats.game_active:
 				self.ship.update()
+				self._update_ship_health()
 				self._update_bullets()	
 				self._update_superbullets()
-				self._update_lazers()
+				self._shoot_lazers()
+				self._check_lazer_position()
 				self._update_explosions()
 				self._update_aliens()
 					
@@ -127,10 +129,14 @@ class AlienInvasion:
 		self.bullets.empty()
 		self.superbullets.empty()
 		self.lazers.empty()
+		self.explosions.empty()
 			
 		#Positioning the ship in center
 		self._create_alien()
 		self.ship.center_ship()
+		
+		#Restoring ship health
+		self._renew_health_bar()
 			
 		#Hiding cursor
 		pygame.mouse.set_visible(False)
@@ -273,14 +279,12 @@ class AlienInvasion:
 	
 		#Checking for collisions between spaceship and alien ship
 		if pygame.sprite.spritecollideany(self.ship, self.aliens):
-			ship_explosion = Explosion(self, self.ship.rect.center, "big")
-			self.explosions.add(ship_explosion)
 			self._ship_hit()
 			
 		#Checking for alien ship to get to the bottom of the screen
 		self._check_aliens_bottom()
 
-	def _update_lazers(self):
+	def _shoot_lazers(self):
 		'''Creating new lazer and controlling time between lazer shoots'''
 		#Recording current time
 		time_now = pygame.time.get_ticks()
@@ -298,9 +302,11 @@ class AlienInvasion:
 			if self.settings.sound_on:
 				self.settings.play_sound_effect("shoot_alien_lazer")
 				
+	def _check_lazer_position(self):
+		'''Renewing lazer position on the screen and checking for collisions with the ship'''
 		#Renewing lazers position and removing old ones
 		self.lazers.update()
-
+		
 		#Removing lazers outside the screen
 		for lazer in self.lazers.copy():
 			if lazer.rect.top >= self.settings.screen_height:
@@ -308,15 +314,56 @@ class AlienInvasion:
 				
 			#Checking lazer-ship collision and running explosion animation
 			if pygame.sprite.spritecollideany(self.ship, self.lazers):
-				explosion = Explosion(self, self.ship.rect.center, "small")
+				lazer.kill()
+				explosion = Explosion(self, self.ship.rect.center, "very_small")
 				self.explosions.add(explosion)
+				self.ship.health_remaining -= 1
 				if self.settings.sound_on:
-					self.settings.play_sound_effect("small_explosion")
-					self._ship_hit()
-				self._ship_hit()
+					self.settings.play_sound_effect("ship_hit")
+					
+	def _draw_health_bar(self):
+		'''Drawing spaceship health bar'''
+		bar_x = self.ship.rect.x
+		bar_y = self.ship.rect.bottom + 10
+		bar_width = self.ship.rect.width
+		bar_height = 15
+		pygame.draw.rect(self.screen, (255, 0, 0), (bar_x, bar_y, bar_width, bar_height))
+				
+	def _update_ship_health(self):
+		'''Updating health bar'''
+		if self.ship.health_remaining > 0:
+			bar_x = self.ship.rect.x
+			bar_y = self.ship.rect.bottom + 10
+			bar_height = 15
+			bar_width = int(self.ship.rect.width * (
+				(self.ship.health_remaining / self.ship.health_start)))
+			pygame.draw.rect(self.screen, (0, 255, 0), (
+				(bar_x, bar_y, bar_width, bar_height)))
+		elif self.ship.health_remaining <= 0:
+			if self.stats.ships_left > 0:
+				self.stats.ships_left -= 1
+				self._renew_health_bar()
+				self.scoreboard.prep_ships()
+			else:
+				self.aliens.empty()
+				self.bullets.empty()
+				self.superbullets.empty()
+				
+				self.ship.center_ship()
+				self._renew_health_bar()
+				
+				self.stats.game_active = False
+				pygame.mouse.set_visible(True)
+			
+	def _renew_health_bar(self):
+		self.ship.health_remaining = 3
 		
 	def _ship_hit(self):
 		'''Processing alien-starship collision'''
+		#Creating explosion
+		ship_explosion = Explosion(self, self.ship.rect.center, "big")
+		self.explosions.add(ship_explosion)
+
 		if self.stats.ships_left > 0:
 			#Decreasing number of ships left
 			self.stats.ships_left -= 1
@@ -337,19 +384,13 @@ class AlienInvasion:
 			pygame.mouse.set_visible(True)
 		
 		if self.settings.sound_on:
-			self.settings.play_sound_effect("ship_hit")
-		
+			self.settings.play_sound_effect("big_explosion")
+			
 	def _check_aliens_bottom(self):
 		'''Checking for alien ship to get to the bottom of the screen'''
 		screen_rect = self.screen.get_rect()
 		for alien in self.aliens.sprites():
 			if alien.rect.bottom >= screen_rect.bottom:
-				screen_explosion = Explosion(self, screen_rect.center, "super_big")
-				self.explosions.add(screen_explosion)
-				if self.settings.sound_on:
-					self.settings.play_sound_effect("ship_hit")
-					self.settings.play_sound_effect("super_big_explosion")
-					self._ship_hit()
 				self._ship_hit()
 		
 	def _create_starry_sky(self):
@@ -381,6 +422,8 @@ class AlienInvasion:
 		self.screen.fill(self.settings.bg_color)
 		self.stars.draw(self.screen)
 		self.ship.blitme()
+		self._draw_health_bar()
+		self._update_ship_health()
 		self.bullets.draw(self.screen)
 		self.superbullets.draw(self.screen)
 		self.explosions.draw(self.screen)	

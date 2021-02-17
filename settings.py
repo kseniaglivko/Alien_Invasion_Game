@@ -84,10 +84,6 @@ class Settings:
 			self.bullet_sound = pygame.mixer.Sound("sounds/big_explosion")
 			self.bullet_sound.set_volume(0.15)
 			self.bullet_sound.play()
-		elif effect == "super_big_explosion":
-			self.bullet_sound = pygame.mixer.Sound("sounds/super_big_explosion")
-			self.bullet_sound.set_volume(0.15)
-			self.bullet_sound.play()
 		elif effect == "press_button":
 			self.bullet_sound = pygame.mixer.Sound("sounds/button_pressed")
 			self.bullet_sound.set_volume(0.15)

@@ -4,19 +4,21 @@ from pygame.sprite import Sprite
 class Ship(Sprite):
 	'''Class to control the ship'''
 	
-	def __init__(self, ai_game):
+	def __init__(self, ai_game, health):
 		'''Initializing the ship and its starting position'''
 		super().__init__()
 		self.screen = ai_game.screen
 		self.settings = ai_game.settings
 		self.screen_rect = ai_game.screen.get_rect()
+		self.screen_width = self.settings.screen_width
+		self.screen_height = self.settings.screen_height
 		
 		#Loading ship image
 		self.image = pygame.image.load('images/ship.bmp')
 		self.rect = self.image.get_rect()
 		
-		#Each new ship appears at the bottom of the screen
-		self.rect.midbottom = self.screen_rect.midbottom
+		#Each new ship appears at the bottom of the screen above the health bar
+		self.rect.midbottom = int(self.screen_width / 2), self.screen_height - 100
 		
 		#Save floating coordinates of the center of the ship
 		self.x = float(self.rect.x)
@@ -25,6 +27,9 @@ class Ship(Sprite):
 		self.moving_right = False
 		self.moving_left = False
 		
+		#Health settings
+		self.health_start = health
+		self.health_remaining = health
 		
 	def update(self):
 		'''Updating ship position'''
@@ -36,12 +41,12 @@ class Ship(Sprite):
 		
 		#Renew rect attribute based on self.x
 		self.rect.x = self.x
-			
+		
 	def blitme(self):
 		'''Draws the ship at the current position'''
 		self.screen.blit(self.image, self.rect)
-		
+			
 	def center_ship(self):
 		'''Position ship in the midbottom of the screen'''
-		self.rect.midbottom = self.screen_rect.midbottom
+		self.rect.midbottom = int(self.screen_width / 2), self.screen_height - 100
 		self.x = float(self.rect.x)

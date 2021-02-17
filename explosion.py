@@ -11,12 +11,12 @@ class Explosion(Sprite):
 		self.images = []
 		for num in range(1, 6):
 			img = pygame.image.load(f"images/exp{num}.png")
+			if size == "very_small":
+				img = pygame.transform.scale(img, (60, 60))
 			if size == "small":
 				img = pygame.transform.scale(img, (80, 80))
 			if size == "big":
 				img = pygame.transform.scale(img, (120, 120))
-			if size == "super_big":
-				img = pygame.transform.scale(img, (200, 200))
 			self.images.append(img)
 		self.index = 0
 		self.image = self.images[self.index]

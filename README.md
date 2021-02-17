@@ -19,5 +19,7 @@ Features, added to the original project:
 4. Sound effects.
 5. Mute and unmute buttons.
 6. Modified movement mechanics for aliens: row system changed to random spawn.
+7. Aliens shoot lazers.
+8. Spaceship health bar added. Health descrease as alien lazers collide with the spaceship.
 
 *Amount of points, given for destroying an alien with a superbullet, is half as much as for destroying an alien with a simple bullet, due to its increased power.

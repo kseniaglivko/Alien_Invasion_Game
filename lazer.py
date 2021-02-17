@@ -18,6 +18,4 @@ class Lazer(Sprite):
 		
 	def update(self):
 		'''Moving lazer downwards'''
-		
-		#Renewing bullet position in float format
 		self.rect.y += self.settings.lazer_speed_factor
